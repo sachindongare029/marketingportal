@@ -1,0 +1,24 @@
+<div class="filters">
+  <div class="filter-item">
+    <label for="asset-type">Asset Type</label>
+    <select id="asset-type">
+      <option>View All</option>
+      {{#each data}}
+        <option>{{assetType}}</option>
+      {{/each}}
+    </select>
+  </div>
+  <div class="filter-item">
+    <label for="brand-view">View By Brand</label>
+    <select id="brand-view">
+      <option>View All</option>
+      {{#each data}}
+      <option>{{assetName}}</option>
+      {{/each}}
+    </select>
+  </div>
+  <div class="filter-item">
+    <label for="search-box">Search</label>
+    <input type="text" id="search-box" />
+  </div>
+</div>

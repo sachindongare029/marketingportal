@@ -1,0 +1,39 @@
+{{#if DemoJson.length}}
+{{!-- {{log DemoJson}} --}}
+<div class="results">
+  <table>
+    <tbody>
+      <tr> 
+        <th><img src="/public/images/sort-up-and-down-arrows-couple.svg" alt="sort icon">Brand Name</th>
+        <th>Asset Name</th>
+        <th>Asset Type</th>
+        <th>File Type</th>
+        <th>Specs</th>
+        <th>Last Updated</th>
+        <th>Actions</th>
+      </tr>
+      {{#each DemoJson}}
+        <tr>
+          <td class="result__brand-name">{{brandName}}</td>
+          <td class="result__asset-name">{{assetName}}</td>
+          <td class="result__asset-type">{{assetType}}</td>
+          <td class="result-image__format">{{fileType}}</td>
+          <td class="result-image__resolution">
+            <select>
+              {{#each specs as |item|}}
+                <option>{{item}}</option>
+              {{/each}}
+            </select>
+          </td>
+          <td class="result-last__update">{{lastUpdated}}</td>
+          <td class="result__actions">
+            <div id="copy-link" class="copy-link">Copy Link</div>
+            <div id="download" class="download">Download</div>
+            <div id="preview" class="preview">Preview</div>
+          </td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</div>
+{{/if}}

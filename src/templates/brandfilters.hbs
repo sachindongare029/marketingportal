@@ -1,0 +1,22 @@
+<div class="brand__filters">
+  <div class="brand__filter-item">
+    <label for="retailer-type">Select A Retailer</label>
+    <select id="retailer-type">
+      <option>All Retailers</option>
+      {{#each data}}
+      <option>{{retailer}}</option>
+      {{/each}}
+    </select>
+  </div>
+  <div class="brand__filter-item">
+    <label for="start-date">Start Date:</label>
+    <input type="date" id="start-date">
+  </div>
+  <div class="brand__filter-item">
+    <label for="end-date">End Date:</label>
+    <input type="date" id="end-date">
+  </div>
+  <div class="brand__filter-item">
+    <button class="activity-btn">View Retailer Activity</button>
+  </div>
+</div> 
