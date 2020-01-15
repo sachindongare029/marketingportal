@@ -19453,6 +19453,34 @@ var TemplateManager = (function() {
 
 // Intitalize template manager
 App.templateManager = new TemplateManager();
+;Handlebars.registerHelper("selectDropdownFileType", function(obj, type) {
+  var Ftype = type.data.root.fileType;
+  // console.log("Ftype", Ftype);
+  var fileType = obj.reduce((acc, val) => {
+    acc.indexOf(val.fileType) === -1 ? acc.push(val.fileType) : acc;
+    return acc;
+  }, []);
+  var strSelect = '<select class="file-type">';
+  fileType.forEach(element => {
+    if (Ftype === element) {
+      strSelect = strSelect + "<option selected>" + element + "</option>";
+    } else {
+      strSelect = strSelect + '<option>' + element + '</option>';
+    }
+  });
+  return new Handlebars.SafeString( strSelect + '</select>');
+});
+
+Handlebars.registerHelper("selectDropdownResolution", function(obj, type) {
+  console.log("TCL: type", type.data.root.fileType);
+  var resolution = obj.reduce((acc, val) => {
+  }, []);
+  var strSelect = "<select>";
+  // resolution.forEach(element => {
+  //   strSelect = strSelect + "<option>" + element + "</option>";
+  // });
+  return new Handlebars.SafeString(strSelect + "</select>");
+});
 ;// Global configurations
 Handlebars.logger.level = 0;
 
@@ -19463,6 +19491,26 @@ var App = {
   helpers: {},
   eventBus: _.extend({}, Backbone.Events)
 };
+;var App = App || {}
+
+App.helpers = {
+	setFilters: function(newFilters) {
+		var oldFilters = this.getFilters();
+		var finalFilters = _.extend({}, oldFilters, newFilters);
+		localStorage.setItem('filters', JSON.stringify(finalFilters));
+	},
+	getFilters: function() {
+		var filters = localStorage.getItem('filters');
+		if(!filters) {
+			return {}
+		};
+		filters = JSON.parse(filters);
+		return filters;
+	}
+}
+
+
+
 ;var App = App || {};
 
 App.views.BrandDescView = Backbone.View.extend({
@@ -19773,52 +19821,117 @@ App.views.HomeView = Backbone.View.extend({
     var self = this;
     var JSON = [
       {
-        brandName: "OPT",
-        assetName: "Sample Image",
-        assetType: "Logo",
-        fileType: "JPEG",
-        specs: [
-          "3242 x 2421 at 300 dpl",
-          "1920 x 1080 at 72 dpl",
-          "6000 x 6000 at 300 dpl"
+        _id: "5e1ecdcc028347840bb260c7",
+        name: "My getmail",
+        asset_type: "Banner",
+        brandId: "11",
+        status: "active",
+        __v: 0,
+        zipFileUrl:
+          "https://s3.amazonaws.com/varsha-testing/email-attachments/10_assets.zip",
+        retailers: ["13", "15"],
+        actions: {
+          request: true,
+          download: true,
+          copy: true,
+          preview: true
+        },
+        assets: [
+          {
+            _id: "5e1ecb1c08bb36f10a0ea14c",
+            id: 18,
+            brandId: "10",
+            fileType: "jpg",
+            optionalFileName: "s2.jpg",
+            optionalFileUrl:
+              "https://s3.amazonaws.com/varsha-testing/email-attachments/s2.jpg",
+            url:
+              "https://s3.amazonaws.com/varsha-testing/email-attachments/s1.jpg",
+            name: "s1.jpg",
+            __v: 0,
+            spec: {
+              width: 200,
+              height: 400,
+              resolution: "530 dpi",
+              title: "spec"
+            }
+          },
+          {
+            _id: "5e1dd69b834c28622e0fca76",
+            id: 17,
+            brandId: "10",
+            fileType: "pdf",
+            optionalFileName: "s2.jpg",
+            optionalFileUrl:
+              "https://s3.amazonaws.com/varsha-testing/email-attachments/s2.jpg",
+            url:
+              "https://s3.amazonaws.com/varsha-testing/email-attachments/s1.jpg",
+            name: "s1.jpg",
+            __v: 0,
+            spec: {
+              title: "spec"
+            }
+          }
         ],
-        lastUpdated: "12/07/2017"
+        keyword: ["Test2iabcsdfsdftt"]
       },
       {
-        brandName: "A.JAFFE",
-        assetName: "Sample Image",
-        assetType: "Logo",
-        fileType: "JPEG",
-        specs: [
-          "3242 x 2421 at 300 dpl",
-          "1920 x 1080 at 72 dpl",
-          "6000 x 6000 at 300 dpl"
+        _id: "5e1ecdd5028347840bb260c8",
+        name: "My dontgetmail",
+        asset_type: "Banner",
+        brandId: "10",
+        status: "active",
+        __v: 0,
+        zipFileUrl:
+          "https://s3.amazonaws.com/varsha-testing/email-attachments/10_assets.zip",
+        retailers: ["13", "15"],
+        actions: {
+          request: true,
+          download: true,
+          copy: true,
+          preview: true
+        },
+        assets: [
+          {
+            _id: "5e1dd0ab3557f2a12d39c7b7",
+            id: 16,
+            brandId: "10",
+            fileType: "jpg",
+            optionalFileName: "s2.jpg",
+            optionalFileUrl:
+              "https://s3.amazonaws.com/varsha-testing/email-attachments/s2.jpg",
+            url:
+              "https://s3.amazonaws.com/varsha-testing/email-attachments/s3.jpg",
+            name: "s3.jpg",
+            __v: 0,
+            spec: {
+              width: 300,
+              height: 400,
+              resolution: "530 dpi",
+              title: "spec"
+            }
+          },
+          {
+            _id: "5e1dd0a13557f2a12d39c7b6",
+            id: 15,
+            brandId: "10",
+            fileType: "jpg",
+            optionalFileName: "s2.jpg",
+            optionalFileUrl:
+              "https://s3.amazonaws.com/varsha-testing/email-attachments/s2.jpg",
+            url:
+              "https://s3.amazonaws.com/varsha-testing/email-attachments/s3.jpg",
+            name: "s3.jpg",
+            __v: 0,
+            spec: {
+              width: 600,
+              height: 700,
+              resolution: "830 dpi",
+              title: "spec"
+            }
+          }
         ],
-        lastUpdated: "12/07/2018"
-      },
-      {
-        brandName: "Harry Kotlar",
-        assetName: "Sample Image",
-        assetType: "Logo",
-        fileType: "JPEG",
-        specs: [
-          "3242 x 2421 at 300 dpl",
-          "1920 x 1080 at 72 dpl",
-          "6000 x 6000 at 300 dpl"
-        ],
-        lastUpdated: "09/07/2020"
-      },
-      {
-        brandName: "Fred Leighton",
-        assetName: "Sample Image",
-        assetType: "Logo",
-        fileType: "JPEG",
-        specs: [
-          "3242 x 2421 at 300 dpl",
-          "1920 x 1080 at 72 dpl",
-          "6000 x 6000 at 300 dpl"
-        ],
-        lastUpdated: "27/11/2080"
+        keyword: ["Test2iabcsdfsdftt"]
       }
     ];
     $.get("/src/templates/home.hbs", function(templateHtml) {
@@ -19898,11 +20011,21 @@ App.views.ResultView = Backbone.View.extend({
   events: {
     "click #copy-link": "copyLink",
     "click #download": "download",
-    "click #preview": "preview"
+    "click #preview": "preview",
+    "click #sort-brand": "BrandSort",
+    "change .file-type": "fileTypeChange"
   },
 
   initialize: function(options) {
     this.options = options.data;
+    var fileTypeSelected;
+    $.each(this.options, function(index, ele) {
+      fileTypeSelected = ele.assets[0].fileType;
+    })
+    this.fileTypeSelected = fileTypeSelected;
+    // App.helpers.setFilters({
+    //   fileType: "jpg"
+    // });
     _.bindAll(this, "render");
     this.render();
   },
@@ -19912,11 +20035,27 @@ App.views.ResultView = Backbone.View.extend({
     $.get("/src/templates/results.hbs", function(templateHtml) {
       var template = Handlebars.compile(templateHtml);
       var finalHtml = template({
-        DemoJson: self.options
+        tableData: self.options,
+        fileType: self.fileTypeSelected
       });
       self.$el.html(finalHtml);
     });
     return self;
+  },
+
+  BrandSort: function() {
+    this.options = _.sortBy(this.options, "brandId");
+    this.render();
+  },
+
+  fileTypeChange: function(e) {
+    var selIndex = e.target.options.selectedIndex;
+    // console.log("value", e.target.options[selIndex].text);
+    this.fileTypeSelected = e.target.options[selIndex].text;
+    // App.helpers.setFilters({
+    //   fileType: fileType
+    // });
+    this.render();
   },
 
   copyLink: function() {
@@ -19936,7 +20075,7 @@ App.views.ResultView = Backbone.View.extend({
 App.Router = Backbone.Router.extend({
   routes: {
     "": "homeView",
-    "brands": "brandView"
+    brands: "brandView"
   },
 
   homeView: function() {

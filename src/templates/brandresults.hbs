@@ -3,7 +3,7 @@
 <div class="brand-results">
   <table>
     <tbody>
-      <tr> 
+      <tr>
         <th>Asset Name</th>
         <th>Asset Type</th>
         <th>Asset Previews</th>
@@ -14,16 +14,16 @@
         <th>Preview</th>
       </tr>
       {{#each DemoJson}}
-        <tr>
-          <td class="result__asset-name">{{assetName}}</td>
-          <td class="result__asset-type">{{assetType}}</td>
-          <td class="result__asset-previews">{{assetPreviews}} of times</td>
-          <td class="result__asset-downloads">{{assetDownloads}} of times</td>
-          <td class="result__url-copied">{{urlCopied}} of times</td>
-          <td class="result__keywords-searched">Keyword 1, keyword 2,...</td>
-          <td class="result__asset-requests">{{assetRequests}} of times</td>
-          <td class="result__preview"><button id="preview">click here</button></td>
-        </tr>
+      <tr>
+        <td class="result__asset-name">{{assetName}}</td>
+        <td class="result__asset-type">{{assetType}}</td>
+        <td class="result__asset-previews">{{assetPreviews}} of times</td>
+        <td class="result__asset-downloads">{{assetDownloads}} of times</td>
+        <td class="result__url-copied">{{urlCopied}} of times</td>
+        <td class="result__keywords-searched">Keyword 1, keyword 2,...</td>
+        <td class="result__asset-requests">{{assetRequests}} of times</td>
+        <td class="result__preview"><button id="preview">click here</button></td>
+      </tr>
       {{/each}}
     </tbody>
   </table>

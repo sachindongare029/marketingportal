@@ -1,10 +1,10 @@
-{{#if DemoJson.length}}
-{{!-- {{log DemoJson}} --}}
+{{#if tableData.length}}
+{{!-- {{log tableData}} --}}
 <div class="results">
   <table>
     <tbody>
       <tr> 
-        <th><img src="/public/images/sort-up-and-down-arrows-couple.svg" alt="sort icon">Brand Name</th>
+        <th><img src="/public/images/sort-up-and-down-arrows-couple.svg" alt="sort icon" id='sort-brand'>Brand Name</th>
         <th>Asset Name</th>
         <th>Asset Type</th>
         <th>File Type</th>
@@ -12,18 +12,26 @@
         <th>Last Updated</th>
         <th>Actions</th>
       </tr>
-      {{#each DemoJson}}
+      {{#each tableData}}
         <tr>
-          <td class="result__brand-name">{{brandName}}</td>
-          <td class="result__asset-name">{{assetName}}</td>
-          <td class="result__asset-type">{{assetType}}</td>
-          <td class="result-image__format">{{fileType}}</td>
-          <td class="result-image__resolution">
-            <select>
-              {{#each specs as |item|}}
-                <option>{{item}}</option>
+          <td class="result__brand-name">{{brandId}}</td>
+          <td class="result__asset-name">{{name}}</td>
+          <td class="result__asset-type">{{asset_type}}</td>
+          <td class="result-file-type">
+            {{selectDropdownFileType (assets, fileType)}}
+            {{!-- <select>
+              {{#each assets}}
+                <option>{{fileType}}</option>
               {{/each}}
-            </select>
+            </select> --}}
+          </td>
+          <td class="result-image__resolution">
+            {{selectDropdownResolution assets}}
+            {{!-- <select>
+              {{#each assets}}
+                <option>{{spec.width}} X {{spec.height}} at {{spec.resolution}}</option>
+              {{/each}}
+            </select> --}}
           </td>
           <td class="result-last__update">{{lastUpdated}}</td>
           <td class="result__actions">
