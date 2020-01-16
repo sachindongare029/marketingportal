@@ -19454,15 +19454,14 @@ var TemplateManager = (function() {
 // Intitalize template manager
 App.templateManager = new TemplateManager();
 ;Handlebars.registerHelper("selectDropdownFileType", function(obj, type) {
-  var Ftype = type.data.root.fileType;
-  // console.log("Ftype", Ftype);
+  var fType = type.data.root.fileType;
   var fileType = obj.reduce((acc, val) => {
     acc.indexOf(val.fileType) === -1 ? acc.push(val.fileType) : acc;
     return acc;
   }, []);
   var strSelect = '<select class="file-type">';
   fileType.forEach(element => {
-    if (Ftype === element) {
+    if (fType === element) {
       strSelect = strSelect + "<option selected>" + element + "</option>";
     } else {
       strSelect = strSelect + '<option>' + element + '</option>';
@@ -19472,13 +19471,23 @@ App.templateManager = new TemplateManager();
 });
 
 Handlebars.registerHelper("selectDropdownResolution", function(obj, type) {
-  console.log("TCL: type", type.data.root.fileType);
-  var resolution = obj.reduce((acc, val) => {
-  }, []);
+  var fType = type.data.root.fileType;
+  var specObj = [];
   var strSelect = "<select>";
-  // resolution.forEach(element => {
-  //   strSelect = strSelect + "<option>" + element + "</option>";
-  // });
+  for (var i = 0; i < obj.length; i++) {
+    if (obj[i].fileType === fType) {
+      specObj.push(obj[i]);
+    }
+  }
+  if (fType == "pdf") {
+    specObj.forEach(element => {
+      strSelect = strSelect + '<option>'+ element.spec.title +'</option>';
+    });
+  } else {
+    specObj.forEach(element => {
+      strSelect = strSelect + "<option>" + element.spec.width + ' X ' + element.spec.height + ' at ' + element.spec.resolution + "</option>";
+    });
+  }
   return new Handlebars.SafeString(strSelect + "</select>");
 });
 ;// Global configurations
@@ -19511,6 +19520,28 @@ App.helpers = {
 
 
 
+;var App = App || {};
+
+App.models.MarketingModel = Backbone.Model.extend({
+  url: function() {
+    return "http://157.230.67.60/node/api/mvpassets?retailers=10";
+  },
+  defaults: {
+    _id: null,
+  }
+});
+;var App = App || {};
+
+var base_url = "http://157.230.67.60/node/api/mvpassets";
+App.collections.MarketingCollection = Backbone.Collection.extend({
+  url: function() {
+    return base_url;
+  },
+  model: App.models.MarketingModel,
+  parse: function(response) {
+    return response;
+  }
+});
 ;var App = App || {};
 
 App.views.BrandDescView = Backbone.View.extend({
@@ -19813,127 +19844,28 @@ App.views.HomeView = Backbone.View.extend({
   events: {},
 
   initialize: function() {
-    _.bindAll(this, "render");
-    this.render();
+    _.bindAll(this, "render", "doFetch");
+    this.collection = new App.collections.MarketingCollection();
+    App.eventBus.on(
+      "GET_PRODUCTS",
+      function() {
+        this.doFetch();
+      }.bind(this)
+    );
+
+    App.eventBus.trigger("GET_PRODUCTS");
+  },
+
+  doFetch: function() {
+    var self = this;
+    // var filters = App.helpers.getFilters();
+    this.collection.fetch().done(function() {
+      self.render();
+    });
   },
 
   render: function() {
     var self = this;
-    var JSON = [
-      {
-        _id: "5e1ecdcc028347840bb260c7",
-        name: "My getmail",
-        asset_type: "Banner",
-        brandId: "11",
-        status: "active",
-        __v: 0,
-        zipFileUrl:
-          "https://s3.amazonaws.com/varsha-testing/email-attachments/10_assets.zip",
-        retailers: ["13", "15"],
-        actions: {
-          request: true,
-          download: true,
-          copy: true,
-          preview: true
-        },
-        assets: [
-          {
-            _id: "5e1ecb1c08bb36f10a0ea14c",
-            id: 18,
-            brandId: "10",
-            fileType: "jpg",
-            optionalFileName: "s2.jpg",
-            optionalFileUrl:
-              "https://s3.amazonaws.com/varsha-testing/email-attachments/s2.jpg",
-            url:
-              "https://s3.amazonaws.com/varsha-testing/email-attachments/s1.jpg",
-            name: "s1.jpg",
-            __v: 0,
-            spec: {
-              width: 200,
-              height: 400,
-              resolution: "530 dpi",
-              title: "spec"
-            }
-          },
-          {
-            _id: "5e1dd69b834c28622e0fca76",
-            id: 17,
-            brandId: "10",
-            fileType: "pdf",
-            optionalFileName: "s2.jpg",
-            optionalFileUrl:
-              "https://s3.amazonaws.com/varsha-testing/email-attachments/s2.jpg",
-            url:
-              "https://s3.amazonaws.com/varsha-testing/email-attachments/s1.jpg",
-            name: "s1.jpg",
-            __v: 0,
-            spec: {
-              title: "spec"
-            }
-          }
-        ],
-        keyword: ["Test2iabcsdfsdftt"]
-      },
-      {
-        _id: "5e1ecdd5028347840bb260c8",
-        name: "My dontgetmail",
-        asset_type: "Banner",
-        brandId: "10",
-        status: "active",
-        __v: 0,
-        zipFileUrl:
-          "https://s3.amazonaws.com/varsha-testing/email-attachments/10_assets.zip",
-        retailers: ["13", "15"],
-        actions: {
-          request: true,
-          download: true,
-          copy: true,
-          preview: true
-        },
-        assets: [
-          {
-            _id: "5e1dd0ab3557f2a12d39c7b7",
-            id: 16,
-            brandId: "10",
-            fileType: "jpg",
-            optionalFileName: "s2.jpg",
-            optionalFileUrl:
-              "https://s3.amazonaws.com/varsha-testing/email-attachments/s2.jpg",
-            url:
-              "https://s3.amazonaws.com/varsha-testing/email-attachments/s3.jpg",
-            name: "s3.jpg",
-            __v: 0,
-            spec: {
-              width: 300,
-              height: 400,
-              resolution: "530 dpi",
-              title: "spec"
-            }
-          },
-          {
-            _id: "5e1dd0a13557f2a12d39c7b6",
-            id: 15,
-            brandId: "10",
-            fileType: "jpg",
-            optionalFileName: "s2.jpg",
-            optionalFileUrl:
-              "https://s3.amazonaws.com/varsha-testing/email-attachments/s2.jpg",
-            url:
-              "https://s3.amazonaws.com/varsha-testing/email-attachments/s3.jpg",
-            name: "s3.jpg",
-            __v: 0,
-            spec: {
-              width: 600,
-              height: 700,
-              resolution: "830 dpi",
-              title: "spec"
-            }
-          }
-        ],
-        keyword: ["Test2iabcsdfsdftt"]
-      }
-    ];
     $.get("/src/templates/home.hbs", function(templateHtml) {
       var template = Handlebars.compile(templateHtml);
       var finalHtml = template({
@@ -19942,8 +19874,8 @@ App.views.HomeView = Backbone.View.extend({
       });
       self.$el.html(finalHtml);
       self.renderDescView();
-      self.renderFilterView(JSON);
-      self.renderResultView(JSON);
+      self.renderFilterView();
+      self.renderResultView();
     });
     return self;
   },
@@ -19952,15 +19884,15 @@ App.views.HomeView = Backbone.View.extend({
     new App.views.DescView();
   },
 
-  renderFilterView: function(JSON) {
+  renderFilterView: function() {
     new App.views.FilterView({
-      data: JSON
+      data: this.collection.toJSON()
     });
   },
 
-  renderResultView: function(JSON) {
+  renderResultView: function() {
     new App.views.ResultView({
-      data: JSON
+      data: this.collection.toJSON()
     });
   }
 });
@@ -20019,9 +19951,9 @@ App.views.ResultView = Backbone.View.extend({
   initialize: function(options) {
     this.options = options.data;
     var fileTypeSelected;
-    $.each(this.options, function(index, ele) {
-      fileTypeSelected = ele.assets[0].fileType;
-    })
+    // $.each(this.options, function(index, ele) {
+    //   fileTypeSelected = ele.assets[0].fileType;
+    // })
     this.fileTypeSelected = fileTypeSelected;
     // App.helpers.setFilters({
     //   fileType: "jpg"
@@ -20032,6 +19964,7 @@ App.views.ResultView = Backbone.View.extend({
 
   render: function() {
     var self = this;
+    console.log("options", self.options);
     $.get("/src/templates/results.hbs", function(templateHtml) {
       var template = Handlebars.compile(templateHtml);
       var finalHtml = template({

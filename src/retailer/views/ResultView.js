@@ -14,9 +14,9 @@ App.views.ResultView = Backbone.View.extend({
   initialize: function(options) {
     this.options = options.data;
     var fileTypeSelected;
-    $.each(this.options, function(index, ele) {
-      fileTypeSelected = ele.assets[0].fileType;
-    })
+    // $.each(this.options, function(index, ele) {
+    //   fileTypeSelected = ele.assets[0].fileType;
+    // })
     this.fileTypeSelected = fileTypeSelected;
     // App.helpers.setFilters({
     //   fileType: "jpg"
@@ -27,6 +27,7 @@ App.views.ResultView = Backbone.View.extend({
 
   render: function() {
     var self = this;
+    console.log("options", self.options);
     $.get("/src/templates/results.hbs", function(templateHtml) {
       var template = Handlebars.compile(templateHtml);
       var finalHtml = template({

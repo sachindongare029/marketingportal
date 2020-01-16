@@ -4,7 +4,7 @@
   <table>
     <tbody>
       <tr> 
-        <th><img src="/public/images/sort-up-and-down-arrows-couple.svg" alt="sort icon" id='sort-brand'>Brand Name</th>
+        <th><img src="/public/images/sort-up-and-down-arrows-couple.svg" alt="sort icon" id='sort-brand'><span>Brand Name</span></th>
         <th>Asset Name</th>
         <th>Asset Type</th>
         <th>File Type</th>
@@ -18,20 +18,20 @@
           <td class="result__asset-name">{{name}}</td>
           <td class="result__asset-type">{{asset_type}}</td>
           <td class="result-file-type">
-            {{selectDropdownFileType (assets, fileType)}}
-            {{!-- <select>
+            {{!-- {{selectDropdownFileType assets}} --}}
+            <select>
               {{#each assets}}
                 <option>{{fileType}}</option>
               {{/each}}
-            </select> --}}
+            </select>
           </td>
           <td class="result-image__resolution">
-            {{selectDropdownResolution assets}}
-            {{!-- <select>
+            {{!-- {{selectDropdownResolution assets}} --}}
+            <select>
               {{#each assets}}
                 <option>{{spec.width}} X {{spec.height}} at {{spec.resolution}}</option>
               {{/each}}
-            </select> --}}
+            </select>
           </td>
           <td class="result-last__update">{{lastUpdated}}</td>
           <td class="result__actions">
