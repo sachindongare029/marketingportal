@@ -19453,41 +19453,20 @@ var TemplateManager = (function() {
 
 // Intitalize template manager
 App.templateManager = new TemplateManager();
-;Handlebars.registerHelper("selectDropdownFileType", function(obj, type) {
-  var fType = type.data.root.fileType;
+;Handlebars.registerHelper("selectDropdownFileType", function(obj, id) {
   var fileType = obj.reduce((acc, val) => {
     acc.indexOf(val.fileType) === -1 ? acc.push(val.fileType) : acc;
     return acc;
   }, []);
-  var strSelect = '<select class="file-type">';
+  var strSelect = '<select class="file-type" id=' + id + '><option>Select File Type</option>';
   fileType.forEach(element => {
-    if (fType === element) {
-      strSelect = strSelect + "<option selected>" + element + "</option>";
-    } else {
-      strSelect = strSelect + '<option>' + element + '</option>';
-    }
+    strSelect = strSelect + "<option>" + element + "</option>";
   });
   return new Handlebars.SafeString( strSelect + '</select>');
 });
 
-Handlebars.registerHelper("selectDropdownResolution", function(obj, type) {
-  var fType = type.data.root.fileType;
-  var specObj = [];
+Handlebars.registerHelper("selectDropdownResolution", function(obj) {
   var strSelect = "<select>";
-  for (var i = 0; i < obj.length; i++) {
-    if (obj[i].fileType === fType) {
-      specObj.push(obj[i]);
-    }
-  }
-  if (fType == "pdf") {
-    specObj.forEach(element => {
-      strSelect = strSelect + '<option>'+ element.spec.title +'</option>';
-    });
-  } else {
-    specObj.forEach(element => {
-      strSelect = strSelect + "<option>" + element.spec.width + ' X ' + element.spec.height + ' at ' + element.spec.resolution + "</option>";
-    });
-  }
   return new Handlebars.SafeString(strSelect + "</select>");
 });
 ;// Global configurations
@@ -19950,14 +19929,6 @@ App.views.ResultView = Backbone.View.extend({
 
   initialize: function(options) {
     this.options = options.data;
-    var fileTypeSelected;
-    // $.each(this.options, function(index, ele) {
-    //   fileTypeSelected = ele.assets[0].fileType;
-    // })
-    this.fileTypeSelected = fileTypeSelected;
-    // App.helpers.setFilters({
-    //   fileType: "jpg"
-    // });
     _.bindAll(this, "render");
     this.render();
   },
@@ -19968,8 +19939,7 @@ App.views.ResultView = Backbone.View.extend({
     $.get("/src/templates/results.hbs", function(templateHtml) {
       var template = Handlebars.compile(templateHtml);
       var finalHtml = template({
-        tableData: self.options,
-        fileType: self.fileTypeSelected
+        tableData: self.options
       });
       self.$el.html(finalHtml);
     });
@@ -19983,12 +19953,37 @@ App.views.ResultView = Backbone.View.extend({
 
   fileTypeChange: function(e) {
     var selIndex = e.target.options.selectedIndex;
-    // console.log("value", e.target.options[selIndex].text);
-    this.fileTypeSelected = e.target.options[selIndex].text;
-    // App.helpers.setFilters({
-    //   fileType: fileType
-    // });
-    this.render();
+    var fileType = e.target.options[selIndex].text;
+    var optionsArr = [];
+    var optionsObj = {};
+    var result = this.options.find(obj => {
+      return obj._id === e.target.id;
+    });
+    if (fileType == 'pdf') {
+      result.assets.forEach(element => {
+        optionsObj.id = element._id;
+        optionsObj.resolution = element.spec.title;
+        optionsArr.push(optionsObj);
+        optionsObj = {};
+      });
+    } else {
+      result.assets.forEach(element => {
+        optionsObj.id = element._id;
+        optionsObj.resolution = element.spec.width + " X " + element.spec.height + ' at ' + element.spec.resolution;
+        optionsArr.push(optionsObj);
+        optionsObj = {};
+      });
+    }
+    var siblingNode = e.currentTarget.parentNode.nextSibling.nextElementSibling.childNodes[1];
+
+    $(siblingNode).empty();
+    optionsArr.forEach(element => {
+      var option = document.createElement("option");
+      option.text = element.resolution;
+      option.value = element.id;
+      siblingNode.add(option);
+    })
+    console.log("result", result);
   },
 
   copyLink: function() {

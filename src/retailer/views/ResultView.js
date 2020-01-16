@@ -13,14 +13,6 @@ App.views.ResultView = Backbone.View.extend({
 
   initialize: function(options) {
     this.options = options.data;
-    var fileTypeSelected;
-    // $.each(this.options, function(index, ele) {
-    //   fileTypeSelected = ele.assets[0].fileType;
-    // })
-    this.fileTypeSelected = fileTypeSelected;
-    // App.helpers.setFilters({
-    //   fileType: "jpg"
-    // });
     _.bindAll(this, "render");
     this.render();
   },
@@ -31,8 +23,7 @@ App.views.ResultView = Backbone.View.extend({
     $.get("/src/templates/results.hbs", function(templateHtml) {
       var template = Handlebars.compile(templateHtml);
       var finalHtml = template({
-        tableData: self.options,
-        fileType: self.fileTypeSelected
+        tableData: self.options
       });
       self.$el.html(finalHtml);
     });
@@ -46,12 +37,37 @@ App.views.ResultView = Backbone.View.extend({
 
   fileTypeChange: function(e) {
     var selIndex = e.target.options.selectedIndex;
-    // console.log("value", e.target.options[selIndex].text);
-    this.fileTypeSelected = e.target.options[selIndex].text;
-    // App.helpers.setFilters({
-    //   fileType: fileType
-    // });
-    this.render();
+    var fileType = e.target.options[selIndex].text;
+    var optionsArr = [];
+    var optionsObj = {};
+    var result = this.options.find(obj => {
+      return obj._id === e.target.id;
+    });
+    if (fileType == 'pdf') {
+      result.assets.forEach(element => {
+        optionsObj.id = element._id;
+        optionsObj.resolution = element.spec.title;
+        optionsArr.push(optionsObj);
+        optionsObj = {};
+      });
+    } else {
+      result.assets.forEach(element => {
+        optionsObj.id = element._id;
+        optionsObj.resolution = element.spec.width + " X " + element.spec.height + ' at ' + element.spec.resolution;
+        optionsArr.push(optionsObj);
+        optionsObj = {};
+      });
+    }
+    var siblingNode = e.currentTarget.parentNode.nextSibling.nextElementSibling.childNodes[1];
+
+    $(siblingNode).empty();
+    optionsArr.forEach(element => {
+      var option = document.createElement("option");
+      option.text = element.resolution;
+      option.value = element.id;
+      siblingNode.add(option);
+    })
+    console.log("result", result);
   },
 
   copyLink: function() {

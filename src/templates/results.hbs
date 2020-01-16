@@ -4,13 +4,13 @@
   <table>
     <tbody>
       <tr> 
-        <th><img src="/public/images/sort-up-and-down-arrows-couple.svg" alt="sort icon" id='sort-brand'><span>Brand Name</span></th>
-        <th>Asset Name</th>
-        <th>Asset Type</th>
-        <th>File Type</th>
-        <th>Specs</th>
-        <th>Last Updated</th>
-        <th>Actions</th>
+        <th width="15%"><img src="/public/images/sort-up-and-down-arrows-couple.svg" alt="sort icon" id='sort-brand'><span>Brand Name</span></th>
+        <th width="20%">Asset Name</th>
+        <th width="10%">Asset Type</th>
+        <th width="15%">File Type</th>
+        <th width="15%">Specs</th>
+        <th width="15%">Last Updated</th>
+        <th width="10%">Actions</th>
       </tr>
       {{#each tableData}}
         <tr>
@@ -18,16 +18,15 @@
           <td class="result__asset-name">{{name}}</td>
           <td class="result__asset-type">{{asset_type}}</td>
           <td class="result-file-type">
-            {{!-- {{selectDropdownFileType assets}} --}}
-            <select>
+            {{selectDropdownFileType assets _id}}
+            {{!-- <select class="file-type">
               {{#each assets}}
                 <option>{{fileType}}</option>
               {{/each}}
-            </select>
+            </select> --}}
           </td>
           <td class="result-image__resolution">
-            {{!-- {{selectDropdownResolution assets}} --}}
-            <select>
+            <select class="img-resolution">
               {{#each assets}}
                 <option>{{spec.width}} X {{spec.height}} at {{spec.resolution}}</option>
               {{/each}}
