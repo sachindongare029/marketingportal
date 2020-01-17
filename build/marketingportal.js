@@ -19464,11 +19464,6 @@ App.templateManager = new TemplateManager();
   });
   return new Handlebars.SafeString( strSelect + '</select>');
 });
-
-Handlebars.registerHelper("selectDropdownResolution", function(obj) {
-  var strSelect = "<select>";
-  return new Handlebars.SafeString(strSelect + "</select>");
-});
 ;// Global configurations
 Handlebars.logger.level = 0;
 
@@ -19511,7 +19506,7 @@ App.models.MarketingModel = Backbone.Model.extend({
 });
 ;var App = App || {};
 
-var base_url = "http://157.230.67.60/node/api/mvpassets";
+var base_url = "http://157.230.67.60/node/api/mvpassets?retailers=10";
 App.collections.MarketingCollection = Backbone.Collection.extend({
   url: function() {
     return base_url;
@@ -19924,7 +19919,8 @@ App.views.ResultView = Backbone.View.extend({
     "click #download": "download",
     "click #preview": "preview",
     "click #sort-brand": "BrandSort",
-    "change .file-type": "fileTypeChange"
+    "change .file-type": "fileTypeChange",
+    "change .img-resolution": "resolutionChanged"
   },
 
   initialize: function(options) {
@@ -19956,34 +19952,62 @@ App.views.ResultView = Backbone.View.extend({
     var fileType = e.target.options[selIndex].text;
     var optionsArr = [];
     var optionsObj = {};
+    var siblingNode =
+      e.currentTarget.parentNode.nextSibling.nextElementSibling.childNodes[1];
+    var dateNode = $(e.currentTarget.parentNode.parentNode).find('.result-last__update')[0];
     var result = this.options.find(obj => {
       return obj._id === e.target.id;
     });
+    var fileTypeArr = result.assets.filter(obj => {
+      return obj.fileType == fileType;
+    });
+    this.fileTypeArr = fileTypeArr;
+
     if (fileType == 'pdf') {
-      result.assets.forEach(element => {
+      fileTypeArr.forEach(element => {
         optionsObj.id = element._id;
+        optionsObj.url = element.url;
         optionsObj.resolution = element.spec.title;
         optionsArr.push(optionsObj);
         optionsObj = {};
       });
     } else {
-      result.assets.forEach(element => {
+      fileTypeArr.forEach(element => {
         optionsObj.id = element._id;
+        optionsObj.url = element.url;
         optionsObj.resolution = element.spec.width + " X " + element.spec.height + ' at ' + element.spec.resolution;
         optionsArr.push(optionsObj);
         optionsObj = {};
       });
     }
-    var siblingNode = e.currentTarget.parentNode.nextSibling.nextElementSibling.childNodes[1];
-
+    
     $(siblingNode).empty();
-    optionsArr.forEach(element => {
+    if(fileType == 'Select File Type') {
       var option = document.createElement("option");
-      option.text = element.resolution;
-      option.value = element.id;
+      option.text = 'Select Resolution';
       siblingNode.add(option);
+      dateNode.innerHTML = '';
+    } else {
+      optionsArr.forEach(element => {
+        var option = document.createElement("option");
+        option.text = element.resolution;
+        option.value = element.url;
+        option.id = element.id;
+        siblingNode.add(option);
+      })
+      dateNode.innerHTML = new Date(fileTypeArr[0].updatedAt).toLocaleDateString("en-US");
+    }
+  },
+
+  resolutionChanged: function(e) {
+    var selIndex = e.target.options.selectedIndex;
+    var resolution = e.target.options[selIndex].id;
+    var resoObj = this.fileTypeArr.find(obj => {
+      return obj._id == resolution;
     })
-    console.log("result", result);
+    var siblingNode =
+      e.currentTarget.parentNode.nextSibling.nextElementSibling;
+    siblingNode.innerHTML = new Date(resoObj.updatedAt).toLocaleDateString("en-US");
   },
 
   copyLink: function() {

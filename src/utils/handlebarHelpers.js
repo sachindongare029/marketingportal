@@ -9,8 +9,3 @@ Handlebars.registerHelper("selectDropdownFileType", function(obj, id) {
   });
   return new Handlebars.SafeString( strSelect + '</select>');
 });
-
-Handlebars.registerHelper("selectDropdownResolution", function(obj) {
-  var strSelect = "<select>";
-  return new Handlebars.SafeString(strSelect + "</select>");
-});
