@@ -1,5 +1,5 @@
 {{#if tableData.length}}
-{{!-- {{log tableData}} --}}
+{{!-- {{log updatedTime}} --}}
 <div class="results">
   <table>
     <tbody>
@@ -21,15 +21,19 @@
             {{selectDropdownFileType assets _id}}
           </td>
           <td class="result-image__resolution">
-            <select class="img-resolution">
-              <option>Select Resolution</option>
-            </select>
+            {{selectDropdownReso assets _id}}
           </td>
-          <td class="result-last__update"></td>
+          <td class="result-last__update">{{updatedTime updatedAt}}</td>
           <td class="result__actions">
-            <div id="copy-link" class="copy-link">Copy Link</div>
-            <div id="download" class="download">Download</div>
-            <div id="preview" class="preview">Preview</div>
+            {{#if actions.copy}}
+            <div class="copy-link" class="copy-link" title="copied">Copy Link</div>
+            {{/if}}
+            {{#if actions.download}}
+            <div class="download" class="download">Download</div>
+            {{/if}}
+            {{#if actions.preview}}
+            <div class="preview" class="preview">Preview</div>
+            {{/if}}
           </td>
         </tr>
       {{/each}}

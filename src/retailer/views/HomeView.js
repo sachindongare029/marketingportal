@@ -10,18 +10,27 @@ App.views.HomeView = Backbone.View.extend({
     this.collection = new App.collections.MarketingCollection();
     App.eventBus.on(
       "GET_PRODUCTS",
-      function() {
-        this.doFetch();
+      function(filtersPassed) {
+        this.doFetch(filtersPassed);
       }.bind(this)
     );
 
-    App.eventBus.trigger("GET_PRODUCTS");
+    App.eventBus.trigger("GET_PRODUCTS", {});
   },
 
-  doFetch: function() {
+  doFetch: function(filtersPassed) {
+    console.log("passed", filtersPassed);
     var self = this;
+    var filters;
+    if (filtersPassed) {
+      filters = filtersPassed;
+    } else {
+      filters = App.helpers.getFilters();
+    }
+    delete filters.fileType;
     // var filters = App.helpers.getFilters();
-    this.collection.fetch().done(function() {
+    // console.log("filters", filters);
+    this.collection.fetch({ data: filters }).done(function() {
       self.render();
     });
   },

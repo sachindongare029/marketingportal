@@ -19459,10 +19459,43 @@ App.templateManager = new TemplateManager();
     return acc;
   }, []);
   var strSelect = '<select class="file-type" id=' + id + '><option>Select File Type</option>';
-  fileType.forEach(element => {
-    strSelect = strSelect + "<option>" + element + "</option>";
-  });
+  if (fileType.length === 1) {
+    fileType.forEach(element => {
+      strSelect = "<select class='file-type' id=" + id + "><option selected>" + element + "</option>";
+    });
+  } else {
+    fileType.forEach(element => {
+      strSelect = strSelect + "<option>" + element + "</option>";
+    });
+  }
   return new Handlebars.SafeString( strSelect + '</select>');
+});
+
+Handlebars.registerHelper("selectDropdownReso", function(obj, id) {
+  var fileType = obj.reduce((acc, val) => {
+    acc.indexOf(val.fileType) === -1 ? acc.push(val.fileType) : acc;
+    return acc;
+  }, []);
+  var strSelect = "<select class='img-resolution'>";
+  if (fileType.length === 1) {
+    obj.forEach(element => {
+      strSelect = strSelect + "<option value=" + element.url + ">" + element.spec.title + "</option>";
+    });
+  } else {
+    strSelect = strSelect + "<option value=''>Select Resolution</option>"
+  }
+  return new Handlebars.SafeString(strSelect + '</select>');
+});
+
+Handlebars.registerHelper("updatedTime", function(obj) {
+  var strSelect = new Date(obj).toLocaleDateString("en-US");
+  return new Handlebars.SafeString(strSelect);
+});
+
+Handlebars.registerHelper("assetTypeDropdown", function(obj) {
+  var value = obj.asset_type;
+  var str = '<option value="' + value + '">' + value + '</option>';
+  return new Handlebars.SafeString(str);
 });
 ;// Global configurations
 Handlebars.logger.level = 0;
@@ -19790,24 +19823,53 @@ App.views.DescView = Backbone.View.extend({
 App.views.FilterView = Backbone.View.extend({
   el: "#filters",
 
-  events: {},
+  events: {
+    "change #asset-type": "assetTypeFilter"
+  },
 
-  initialize: function(options) {
-    this.options = options.data;
+  initialize: function() {
     _.bindAll(this, "render");
+    var filtersData = $.parseJSON(
+      $.ajax({
+        url: "http://157.230.67.60/node/api/mvpassets?retailers=10",
+        dataType: "json",
+        async: false
+      }).responseText
+    );
+    this.filtersData = filtersData;
     this.render();
   },
 
   render: function() {
     var self = this;
+    var filters = App.helpers.getFilters();
     $.get("/src/templates/filters.hbs", function(templateHtml) {
       var template = Handlebars.compile(templateHtml);
       var finalHtml = template({
-        data: self.options
+        data: self.filtersData
       });
       self.$el.html(finalHtml);
+      $('#asset-type option[value="' + filters.asset_type + '"]')
+        .attr("selected", "selected");
     });
     return self;
+  },
+
+  assetTypeFilter: function() {
+    var assetType = $("#asset-type").val();
+    if (assetType == 'all') {
+      // App.helpers.setFilters({
+      //   asset_type: ''
+      // });
+      App.eventBus.trigger("GET_PRODUCTS", {});
+    } else {
+      App.helpers.setFilters({
+        asset_type: assetType
+      });
+      App.eventBus.trigger("GET_PRODUCTS", {
+        asset_type: assetType
+      });
+    }
   }
 });
 ;var App = App || {};
@@ -19822,18 +19884,27 @@ App.views.HomeView = Backbone.View.extend({
     this.collection = new App.collections.MarketingCollection();
     App.eventBus.on(
       "GET_PRODUCTS",
-      function() {
-        this.doFetch();
+      function(filtersPassed) {
+        this.doFetch(filtersPassed);
       }.bind(this)
     );
 
-    App.eventBus.trigger("GET_PRODUCTS");
+    App.eventBus.trigger("GET_PRODUCTS", {});
   },
 
-  doFetch: function() {
+  doFetch: function(filtersPassed) {
+    console.log("passed", filtersPassed);
     var self = this;
+    var filters;
+    if (filtersPassed) {
+      filters = filtersPassed;
+    } else {
+      filters = App.helpers.getFilters();
+    }
+    delete filters.fileType;
     // var filters = App.helpers.getFilters();
-    this.collection.fetch().done(function() {
+    // console.log("filters", filters);
+    this.collection.fetch({ data: filters }).done(function() {
       self.render();
     });
   },
@@ -19915,9 +19986,9 @@ App.views.ResultView = Backbone.View.extend({
   el: "#results",
 
   events: {
-    "click #copy-link": "copyLink",
-    "click #download": "download",
-    "click #preview": "preview",
+    "click .copy-link": "copyLink",
+    "click .download": "download",
+    "click .preview": "preview",
     "click #sort-brand": "BrandSort",
     "change .file-type": "fileTypeChange",
     "change .img-resolution": "resolutionChanged"
@@ -19954,7 +20025,7 @@ App.views.ResultView = Backbone.View.extend({
     var optionsObj = {};
     var siblingNode =
       e.currentTarget.parentNode.nextSibling.nextElementSibling.childNodes[1];
-    var dateNode = $(e.currentTarget.parentNode.parentNode).find('.result-last__update')[0];
+    // var dateNode = $(e.currentTarget.parentNode.parentNode).find('.result-last__update')[0];
     var result = this.options.find(obj => {
       return obj._id === e.target.id;
     });
@@ -19985,8 +20056,9 @@ App.views.ResultView = Backbone.View.extend({
     if(fileType == 'Select File Type') {
       var option = document.createElement("option");
       option.text = 'Select Resolution';
+      option.value = '';
       siblingNode.add(option);
-      dateNode.innerHTML = '';
+      // dateNode.innerHTML = '';
     } else {
       optionsArr.forEach(element => {
         var option = document.createElement("option");
@@ -19995,23 +20067,37 @@ App.views.ResultView = Backbone.View.extend({
         option.id = element.id;
         siblingNode.add(option);
       })
-      dateNode.innerHTML = new Date(fileTypeArr[0].updatedAt).toLocaleDateString("en-US");
+      // dateNode.innerHTML = new Date(fileTypeArr[0].updatedAt).toLocaleDateString("en-US");
     }
   },
 
   resolutionChanged: function(e) {
-    var selIndex = e.target.options.selectedIndex;
-    var resolution = e.target.options[selIndex].id;
-    var resoObj = this.fileTypeArr.find(obj => {
-      return obj._id == resolution;
-    })
-    var siblingNode =
-      e.currentTarget.parentNode.nextSibling.nextElementSibling;
-    siblingNode.innerHTML = new Date(resoObj.updatedAt).toLocaleDateString("en-US");
+    // var selIndex = e.target.options.selectedIndex;
+    // var resolution = e.target.options[selIndex].id;
+    // var resoObj = this.fileTypeArr.find(obj => {
+    //   return obj._id == resolution;
+    // })
+    // var siblingNode =
+    //   e.currentTarget.parentNode.nextSibling.nextElementSibling;
+    // siblingNode.innerHTML = new Date(resoObj.updatedAt).toLocaleDateString("en-US");
   },
 
-  copyLink: function() {
-    console.log("link copied...");
+  copyLink: function(e) {
+    var domNode = $(e.currentTarget.parentNode.parentNode).find(
+      ".img-resolution"
+    )[0];
+    var selIndex = domNode.options.selectedIndex;
+    var value = domNode.options[selIndex].value;
+    if (value) {
+      var $temp = $("<input>");
+      $("body").append($temp);
+      $temp.val(value).select();
+      document.execCommand("copy");
+      $temp.remove(); 
+      // alert("link copied...");
+    } else {
+      alert("Select file type");
+    }
   },
 
   download: function() {

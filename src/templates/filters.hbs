@@ -2,9 +2,9 @@
   <div class="filter-item">
     <label for="asset-type">Asset Type</label>
     <select id="asset-type">
-      <option>View All</option>
+      <option value="all">View All</option>
       {{#each data}}
-        <option>{{asset_type}}</option>
+      {{assetTypeDropdown this}}
       {{/each}}
     </select>
   </div>
