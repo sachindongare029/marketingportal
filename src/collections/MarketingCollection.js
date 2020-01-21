@@ -1,6 +1,6 @@
 var App = App || {};
 
-var base_url = "http://157.230.67.60/node/api/mvpassets?retailers=10";
+var base_url = "http://optportal-node-qa.optcentral.com/node/api/mvpassets";
 App.collections.MarketingCollection = Backbone.Collection.extend({
   url: function() {
     return base_url;

@@ -15,21 +15,19 @@ App.views.HomeView = Backbone.View.extend({
       }.bind(this)
     );
 
-    App.eventBus.trigger("GET_PRODUCTS", {});
+    App.eventBus.trigger("GET_PRODUCTS", "all");
   },
 
   doFetch: function(filtersPassed) {
-    console.log("passed", filtersPassed);
     var self = this;
-    var filters;
-    if (filtersPassed) {
-      filters = filtersPassed;
-    } else {
-      filters = App.helpers.getFilters();
+    var filters = App.helpers.getFilters();
+    if (filtersPassed && filtersPassed == 'all') {
+      App.helpers.setFilters({
+        asset_type: ''
+      })
+      delete filters.asset_type;
     }
     delete filters.fileType;
-    // var filters = App.helpers.getFilters();
-    // console.log("filters", filters);
     this.collection.fetch({ data: filters }).done(function() {
       self.render();
     });

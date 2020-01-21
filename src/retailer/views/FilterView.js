@@ -11,7 +11,7 @@ App.views.FilterView = Backbone.View.extend({
     _.bindAll(this, "render");
     var filtersData = $.parseJSON(
       $.ajax({
-        url: "http://157.230.67.60/node/api/mvpassets?retailers=10",
+        url: "http://optportal-node-qa.optcentral.com/node/api/mvpassets",
         dataType: "json",
         async: false
       }).responseText
@@ -38,10 +38,7 @@ App.views.FilterView = Backbone.View.extend({
   assetTypeFilter: function() {
     var assetType = $("#asset-type").val();
     if (assetType == 'all') {
-      // App.helpers.setFilters({
-      //   asset_type: ''
-      // });
-      App.eventBus.trigger("GET_PRODUCTS", {});
+      App.eventBus.trigger("GET_PRODUCTS", "all");
     } else {
       App.helpers.setFilters({
         asset_type: assetType

@@ -19531,7 +19531,7 @@ App.helpers = {
 
 App.models.MarketingModel = Backbone.Model.extend({
   url: function() {
-    return "http://157.230.67.60/node/api/mvpassets?retailers=10";
+    return "http://optportal-node-qa.optcentral.com/node/api/mvpassets";
   },
   defaults: {
     _id: null,
@@ -19539,7 +19539,7 @@ App.models.MarketingModel = Backbone.Model.extend({
 });
 ;var App = App || {};
 
-var base_url = "http://157.230.67.60/node/api/mvpassets?retailers=10";
+var base_url = "http://optportal-node-qa.optcentral.com/node/api/mvpassets";
 App.collections.MarketingCollection = Backbone.Collection.extend({
   url: function() {
     return base_url;
@@ -19831,7 +19831,7 @@ App.views.FilterView = Backbone.View.extend({
     _.bindAll(this, "render");
     var filtersData = $.parseJSON(
       $.ajax({
-        url: "http://157.230.67.60/node/api/mvpassets?retailers=10",
+        url: "http://optportal-node-qa.optcentral.com/node/api/mvpassets",
         dataType: "json",
         async: false
       }).responseText
@@ -19858,10 +19858,7 @@ App.views.FilterView = Backbone.View.extend({
   assetTypeFilter: function() {
     var assetType = $("#asset-type").val();
     if (assetType == 'all') {
-      // App.helpers.setFilters({
-      //   asset_type: ''
-      // });
-      App.eventBus.trigger("GET_PRODUCTS", {});
+      App.eventBus.trigger("GET_PRODUCTS", "all");
     } else {
       App.helpers.setFilters({
         asset_type: assetType
@@ -19889,21 +19886,19 @@ App.views.HomeView = Backbone.View.extend({
       }.bind(this)
     );
 
-    App.eventBus.trigger("GET_PRODUCTS", {});
+    App.eventBus.trigger("GET_PRODUCTS", "all");
   },
 
   doFetch: function(filtersPassed) {
-    console.log("passed", filtersPassed);
     var self = this;
-    var filters;
-    if (filtersPassed) {
-      filters = filtersPassed;
-    } else {
-      filters = App.helpers.getFilters();
+    var filters = App.helpers.getFilters();
+    if (filtersPassed && filtersPassed == 'all') {
+      App.helpers.setFilters({
+        asset_type: ''
+      })
+      delete filters.asset_type;
     }
     delete filters.fileType;
-    // var filters = App.helpers.getFilters();
-    // console.log("filters", filters);
     this.collection.fetch({ data: filters }).done(function() {
       self.render();
     });
