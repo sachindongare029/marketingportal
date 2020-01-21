@@ -4,7 +4,8 @@ App.views.FilterView = Backbone.View.extend({
   el: "#filters",
 
   events: {
-    "change #asset-type": "assetTypeFilter"
+    "change #asset-type": "assetTypeFilter",
+    "change #brand-view": "brandNameFilter"
   },
 
   initialize: function() {
@@ -23,21 +24,36 @@ App.views.FilterView = Backbone.View.extend({
   render: function() {
     var self = this;
     var filters = App.helpers.getFilters();
+    var assetTypeData = this.filtersData.reduce((acc, val) => {
+      acc.indexOf(val.asset_type) === -1 ? acc.push(val.asset_type) : acc;
+      return acc;
+    }, []);
+    var brandNameData = this.filtersData.reduce((acc, val) => {
+      acc.indexOf(val.brandName) === -1 ? acc.push(val.brandName) : acc;
+      return acc;
+    }, []);
     $.get("/src/templates/filters.hbs", function(templateHtml) {
       var template = Handlebars.compile(templateHtml);
       var finalHtml = template({
-        data: self.filtersData
+        assetTypeData: assetTypeData,
+        brandNameData: brandNameData
       });
       self.$el.html(finalHtml);
-      $('#asset-type option[value="' + filters.asset_type + '"]')
-        .attr("selected", "selected");
+      $('#asset-type option[value="' + filters.asset_type + '"]').attr(
+        "selected",
+        "selected"
+      );
+      $('#brand-view option[value="' + filters.brandName + '"]').attr(
+        "selected",
+        "selected"
+      );
     });
     return self;
   },
 
   assetTypeFilter: function() {
     var assetType = $("#asset-type").val();
-    if (assetType == 'all') {
+    if (assetType == "all") {
       App.eventBus.trigger("GET_PRODUCTS", "all");
     } else {
       App.helpers.setFilters({
@@ -45,6 +61,20 @@ App.views.FilterView = Backbone.View.extend({
       });
       App.eventBus.trigger("GET_PRODUCTS", {
         asset_type: assetType
+      });
+    }
+  },
+
+  brandNameFilter: function() {
+    var brand = $("#brand-view").val();
+    if (brand == "all") {
+      App.eventBus.trigger("GET_PRODUCTS", "all");
+    } else {
+      App.helpers.setFilters({
+        brandName: brand
+      });
+      App.eventBus.trigger("GET_PRODUCTS", {
+        brandName: brand
       });
     }
   }

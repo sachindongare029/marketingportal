@@ -32,7 +32,7 @@ App.views.ResultView = Backbone.View.extend({
   },
 
   BrandSort: function() {
-    this.options = _.sortBy(this.options, "brandId");
+    this.options = _.sortBy(this.options, "brandName");
     this.render();
   },
 

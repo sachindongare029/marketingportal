@@ -16,15 +16,19 @@ Handlebars.registerHelper("selectDropdownFileType", function(obj, id) {
   return new Handlebars.SafeString( strSelect + '</select>');
 });
 
-Handlebars.registerHelper("selectDropdownReso", function(obj, id) {
+Handlebars.registerHelper("selectDropdownReso", function(obj) {
   var fileType = obj.reduce((acc, val) => {
     acc.indexOf(val.fileType) === -1 ? acc.push(val.fileType) : acc;
     return acc;
   }, []);
   var strSelect = "<select class='img-resolution'>";
   if (fileType.length === 1) {
-    obj.forEach(element => {
-      strSelect = strSelect + "<option value=" + element.url + ">" + element.spec.title + "</option>";
+    obj.forEach(el => {
+      if (fileType[0] == 'pdf') {
+        strSelect = strSelect + "<option value=" + el.url + ">" + el.spec.title + "</option>";
+      } else {
+        strSelect = strSelect + "<option value=" + el.url + ">" + el.spec.width + " X " + el.spec.height + " at " + el.spec.resolution + "</option>";
+      }
     });
   } else {
     strSelect = strSelect + "<option value=''>Select Resolution</option>"
@@ -38,7 +42,11 @@ Handlebars.registerHelper("updatedTime", function(obj) {
 });
 
 Handlebars.registerHelper("assetTypeDropdown", function(obj) {
-  var value = obj.asset_type;
-  var str = '<option value="' + value + '">' + value + '</option>';
+  var str = '<option value="' + obj + '">' + obj + '</option>';
+  return new Handlebars.SafeString(str);
+});
+
+Handlebars.registerHelper("brandNameDropdown", function(obj) {
+  var str = '<option value="' + obj + '">' + obj + "</option>";
   return new Handlebars.SafeString(str);
 });

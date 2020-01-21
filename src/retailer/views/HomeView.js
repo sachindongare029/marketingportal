@@ -23,8 +23,12 @@ App.views.HomeView = Backbone.View.extend({
     var filters = App.helpers.getFilters();
     if (filtersPassed && filtersPassed == 'all') {
       App.helpers.setFilters({
-        asset_type: ''
+        asset_type: '',
+        brandName: ''
       })
+      delete filters.asset_type;
+      delete filters.brandName;
+    } else if (filtersPassed && 'brandName' in filtersPassed) {
       delete filters.asset_type;
     }
     delete filters.fileType;

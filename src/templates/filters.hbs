@@ -3,7 +3,7 @@
     <label for="asset-type">Asset Type</label>
     <select id="asset-type">
       <option value="all">View All</option>
-      {{#each data}}
+      {{#each assetTypeData}}
       {{assetTypeDropdown this}}
       {{/each}}
     </select>
@@ -11,9 +11,9 @@
   <div class="filter-item">
     <label for="brand-view">View By Brand</label>
     <select id="brand-view">
-      <option>View All</option>
-      {{#each data}}
-      <option>{{brandName}}</option>
+      <option value="all">View All</option>
+      {{#each brandNameData}}
+      {{brandNameDropdown this}}
       {{/each}}
     </select>
   </div>

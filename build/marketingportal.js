@@ -19471,15 +19471,19 @@ App.templateManager = new TemplateManager();
   return new Handlebars.SafeString( strSelect + '</select>');
 });
 
-Handlebars.registerHelper("selectDropdownReso", function(obj, id) {
+Handlebars.registerHelper("selectDropdownReso", function(obj) {
   var fileType = obj.reduce((acc, val) => {
     acc.indexOf(val.fileType) === -1 ? acc.push(val.fileType) : acc;
     return acc;
   }, []);
   var strSelect = "<select class='img-resolution'>";
   if (fileType.length === 1) {
-    obj.forEach(element => {
-      strSelect = strSelect + "<option value=" + element.url + ">" + element.spec.title + "</option>";
+    obj.forEach(el => {
+      if (fileType[0] == 'pdf') {
+        strSelect = strSelect + "<option value=" + el.url + ">" + el.spec.title + "</option>";
+      } else {
+        strSelect = strSelect + "<option value=" + el.url + ">" + el.spec.width + " X " + el.spec.height + " at " + el.spec.resolution + "</option>";
+      }
     });
   } else {
     strSelect = strSelect + "<option value=''>Select Resolution</option>"
@@ -19493,8 +19497,12 @@ Handlebars.registerHelper("updatedTime", function(obj) {
 });
 
 Handlebars.registerHelper("assetTypeDropdown", function(obj) {
-  var value = obj.asset_type;
-  var str = '<option value="' + value + '">' + value + '</option>';
+  var str = '<option value="' + obj + '">' + obj + '</option>';
+  return new Handlebars.SafeString(str);
+});
+
+Handlebars.registerHelper("brandNameDropdown", function(obj) {
+  var str = '<option value="' + obj + '">' + obj + "</option>";
   return new Handlebars.SafeString(str);
 });
 ;// Global configurations
@@ -19824,7 +19832,8 @@ App.views.FilterView = Backbone.View.extend({
   el: "#filters",
 
   events: {
-    "change #asset-type": "assetTypeFilter"
+    "change #asset-type": "assetTypeFilter",
+    "change #brand-view": "brandNameFilter"
   },
 
   initialize: function() {
@@ -19843,21 +19852,36 @@ App.views.FilterView = Backbone.View.extend({
   render: function() {
     var self = this;
     var filters = App.helpers.getFilters();
+    var assetTypeData = this.filtersData.reduce((acc, val) => {
+      acc.indexOf(val.asset_type) === -1 ? acc.push(val.asset_type) : acc;
+      return acc;
+    }, []);
+    var brandNameData = this.filtersData.reduce((acc, val) => {
+      acc.indexOf(val.brandName) === -1 ? acc.push(val.brandName) : acc;
+      return acc;
+    }, []);
     $.get("/src/templates/filters.hbs", function(templateHtml) {
       var template = Handlebars.compile(templateHtml);
       var finalHtml = template({
-        data: self.filtersData
+        assetTypeData: assetTypeData,
+        brandNameData: brandNameData
       });
       self.$el.html(finalHtml);
-      $('#asset-type option[value="' + filters.asset_type + '"]')
-        .attr("selected", "selected");
+      $('#asset-type option[value="' + filters.asset_type + '"]').attr(
+        "selected",
+        "selected"
+      );
+      $('#brand-view option[value="' + filters.brandName + '"]').attr(
+        "selected",
+        "selected"
+      );
     });
     return self;
   },
 
   assetTypeFilter: function() {
     var assetType = $("#asset-type").val();
-    if (assetType == 'all') {
+    if (assetType == "all") {
       App.eventBus.trigger("GET_PRODUCTS", "all");
     } else {
       App.helpers.setFilters({
@@ -19865,6 +19889,20 @@ App.views.FilterView = Backbone.View.extend({
       });
       App.eventBus.trigger("GET_PRODUCTS", {
         asset_type: assetType
+      });
+    }
+  },
+
+  brandNameFilter: function() {
+    var brand = $("#brand-view").val();
+    if (brand == "all") {
+      App.eventBus.trigger("GET_PRODUCTS", "all");
+    } else {
+      App.helpers.setFilters({
+        brandName: brand
+      });
+      App.eventBus.trigger("GET_PRODUCTS", {
+        brandName: brand
       });
     }
   }
@@ -19894,8 +19932,12 @@ App.views.HomeView = Backbone.View.extend({
     var filters = App.helpers.getFilters();
     if (filtersPassed && filtersPassed == 'all') {
       App.helpers.setFilters({
-        asset_type: ''
+        asset_type: '',
+        brandName: ''
       })
+      delete filters.asset_type;
+      delete filters.brandName;
+    } else if (filtersPassed && 'brandName' in filtersPassed) {
       delete filters.asset_type;
     }
     delete filters.fileType;
@@ -20009,7 +20051,7 @@ App.views.ResultView = Backbone.View.extend({
   },
 
   BrandSort: function() {
-    this.options = _.sortBy(this.options, "brandId");
+    this.options = _.sortBy(this.options, "brandName");
     this.render();
   },
 
