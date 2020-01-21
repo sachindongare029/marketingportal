@@ -19539,7 +19539,7 @@ App.helpers = {
 
 App.models.MarketingModel = Backbone.Model.extend({
   url: function() {
-    return "http://optportal-node-qa.optcentral.com/node/api/mvpassets";
+    return "https://optportal-node-qa.optcentral.com/node/api/mvpassets";
   },
   defaults: {
     _id: null,
@@ -19547,7 +19547,7 @@ App.models.MarketingModel = Backbone.Model.extend({
 });
 ;var App = App || {};
 
-var base_url = "http://optportal-node-qa.optcentral.com/node/api/mvpassets";
+var base_url = "https://optportal-node-qa.optcentral.com/node/api/mvpassets";
 App.collections.MarketingCollection = Backbone.Collection.extend({
   url: function() {
     return base_url;
@@ -19833,14 +19833,15 @@ App.views.FilterView = Backbone.View.extend({
 
   events: {
     "change #asset-type": "assetTypeFilter",
-    "change #brand-view": "brandNameFilter"
+    "change #brand-view": "brandNameFilter",
+    "keydown #search-box": "keywordFilter"
   },
 
   initialize: function() {
     _.bindAll(this, "render");
     var filtersData = $.parseJSON(
       $.ajax({
-        url: "http://optportal-node-qa.optcentral.com/node/api/mvpassets",
+        url: "https://optportal-node-qa.optcentral.com/node/api/mvpassets",
         dataType: "json",
         async: false
       }).responseText
@@ -19905,6 +19906,14 @@ App.views.FilterView = Backbone.View.extend({
         brandName: brand
       });
     }
+  },
+
+  keywordFilter: function(e) {
+    var code = e.keyCode || e.which;
+    if (code == 13) {
+      var keyword = $("#search-box").val();
+      console.log("TCL: keyword", keyword);
+    }
   }
 });
 ;var App = App || {};
@@ -19930,15 +19939,17 @@ App.views.HomeView = Backbone.View.extend({
   doFetch: function(filtersPassed) {
     var self = this;
     var filters = App.helpers.getFilters();
-    if (filtersPassed && filtersPassed == 'all') {
+    if (filtersPassed && filtersPassed == "all") {
       App.helpers.setFilters({
-        asset_type: '',
-        brandName: ''
-      })
+        asset_type: "",
+        brandName: ""
+      });
       delete filters.asset_type;
       delete filters.brandName;
-    } else if (filtersPassed && 'brandName' in filtersPassed) {
+    } else if (filtersPassed && "brandName" in filtersPassed) {
       delete filters.asset_type;
+    } else if (filtersPassed && "asset_type" in filtersPassed) {
+      delete filters.brandName;
     }
     delete filters.fileType;
     this.collection.fetch({ data: filters }).done(function() {
