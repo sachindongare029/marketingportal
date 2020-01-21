@@ -5,14 +5,15 @@ App.views.FilterView = Backbone.View.extend({
 
   events: {
     "change #asset-type": "assetTypeFilter",
-    "change #brand-view": "brandNameFilter"
+    "change #brand-view": "brandNameFilter",
+    "keydown #search-box": "keywordFilter"
   },
 
   initialize: function() {
     _.bindAll(this, "render");
     var filtersData = $.parseJSON(
       $.ajax({
-        url: "http://optportal-node-qa.optcentral.com/node/api/mvpassets",
+        url: "https://optportal-node-qa.optcentral.com/node/api/mvpassets",
         dataType: "json",
         async: false
       }).responseText
@@ -47,6 +48,7 @@ App.views.FilterView = Backbone.View.extend({
         "selected",
         "selected"
       );
+      $("#search-box").val(filters.keyword);
     });
     return self;
   },
@@ -76,6 +78,23 @@ App.views.FilterView = Backbone.View.extend({
       App.eventBus.trigger("GET_PRODUCTS", {
         brandName: brand
       });
+    }
+  },
+
+  keywordFilter: function(e) {
+    var code = e.keyCode || e.which;
+    if (code == 13) {
+      var keyword = $("#search-box").val();
+      if (!keyword) {
+        App.eventBus.trigger("GET_PRODUCTS", "all");
+      } else {
+        App.helpers.setFilters({
+          keyword: keyword
+        });
+        App.eventBus.trigger("GET_PRODUCTS", {
+          keyword: keyword
+        });
+      }
     }
   }
 });

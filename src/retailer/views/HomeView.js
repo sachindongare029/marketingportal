@@ -21,15 +21,24 @@ App.views.HomeView = Backbone.View.extend({
   doFetch: function(filtersPassed) {
     var self = this;
     var filters = App.helpers.getFilters();
-    if (filtersPassed && filtersPassed == 'all') {
+    if (filtersPassed && filtersPassed == "all") {
       App.helpers.setFilters({
-        asset_type: '',
-        brandName: ''
-      })
+        asset_type: "",
+        brandName: "",
+        keyword: ""
+      });
       delete filters.asset_type;
       delete filters.brandName;
-    } else if (filtersPassed && 'brandName' in filtersPassed) {
+      delete filters.keyword;
+    } else if (filtersPassed && "brandName" in filtersPassed) {
       delete filters.asset_type;
+      delete filters.keyword;
+    } else if (filtersPassed && "asset_type" in filtersPassed) {
+      delete filters.brandName;
+      delete filters.keyword;
+    } else if (filtersPassed && "keyword" in filtersPassed) {
+      delete filters.asset_type;
+      delete filters.brandName;
     }
     delete filters.fileType;
     this.collection.fetch({ data: filters }).done(function() {
