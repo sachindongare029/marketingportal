@@ -22,14 +22,8 @@ App.views.HomeView = Backbone.View.extend({
     var self = this;
     var filters = App.helpers.getFilters();
     if (filtersPassed && filtersPassed == "all") {
-      App.helpers.setFilters({
-        asset_type: "",
-        brandName: "",
-        keyword: ""
-      });
-      delete filters.asset_type;
-      delete filters.brandName;
-      delete filters.keyword;
+      localStorage.removeItem("filters");
+      filters = App.helpers.getFilters();
     } else if (filtersPassed && "brandName" in filtersPassed) {
       delete filters.asset_type;
       delete filters.keyword;
@@ -40,7 +34,6 @@ App.views.HomeView = Backbone.View.extend({
       delete filters.asset_type;
       delete filters.brandName;
     }
-    delete filters.fileType;
     this.collection.fetch({ data: filters }).done(function() {
       self.render();
     });

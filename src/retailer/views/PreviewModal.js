@@ -8,7 +8,8 @@ App.views.PreviewModal = Backbone.View.extend({
     hidden: "close"
   },
 
-  initialize: function() {
+  initialize: function(options) {
+    this.options = options.Items;
     _.bindAll(this, "show", "close", "render", "renderView");
     this.render();
   },
@@ -27,6 +28,7 @@ App.views.PreviewModal = Backbone.View.extend({
     $.get("/src/templates/previewmodal.hbs", function(templateHtml) {
       var template = Handlebars.compile(templateHtml);
       self.renderView(template);
+      $("#modal_content").html(self.options);
     });
     return self;
   },

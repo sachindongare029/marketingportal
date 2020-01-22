@@ -3,9 +3,11 @@
     <label for="asset-type">Asset Type</label>
     <select id="asset-type">
       <option value="all">View All</option>
-      {{#each assetTypeData}}
-      {{assetTypeDropdown this}}
-      {{/each}}
+      <option value="Banner">Banner</option>
+      <option value="Marketing Image">Marketing Image</option>
+      <option value="Videos">Videos</option>
+      <option value="Logo">Logo</option>
+      <option value="Forms">Forms</option>
     </select>
   </div>
   <div class="filter-item">

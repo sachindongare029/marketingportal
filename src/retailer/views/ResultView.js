@@ -52,11 +52,12 @@ App.views.ResultView = Backbone.View.extend({
     });
     this.fileTypeArr = fileTypeArr;
 
-    if (fileType == 'pdf') {
+    if (fileType == "pdf") {
       fileTypeArr.forEach(element => {
         optionsObj.id = element._id;
         optionsObj.url = element.url;
         optionsObj.resolution = element.spec.title;
+        optionsObj.name = element.name;
         optionsArr.push(optionsObj);
         optionsObj = {};
       });
@@ -64,17 +65,24 @@ App.views.ResultView = Backbone.View.extend({
       fileTypeArr.forEach(element => {
         optionsObj.id = element._id;
         optionsObj.url = element.url;
-        optionsObj.resolution = element.spec.width + " X " + element.spec.height + ' at ' + element.spec.resolution;
+        optionsObj.name = element.name;
+        optionsObj.resolution =
+          element.spec.width +
+          " X " +
+          element.spec.height +
+          " at " +
+          element.spec.resolution;
         optionsArr.push(optionsObj);
         optionsObj = {};
       });
     }
-    
+
     $(siblingNode).empty();
-    if(fileType == 'Select File Type') {
+    if (fileType == "Select File Type") {
       var option = document.createElement("option");
-      option.text = 'Select Resolution';
-      option.value = '';
+      option.text = "Select Resolution";
+      option.value = "";
+      option.name = "";
       siblingNode.add(option);
       // dateNode.innerHTML = '';
     } else {
@@ -83,8 +91,9 @@ App.views.ResultView = Backbone.View.extend({
         option.text = element.resolution;
         option.value = element.url;
         option.id = element.id;
+        option.setAttribute('name', element.name);
         siblingNode.add(option);
-      })
+      });
       // dateNode.innerHTML = new Date(fileTypeArr[0].updatedAt).toLocaleDateString("en-US");
     }
   },
@@ -111,7 +120,7 @@ App.views.ResultView = Backbone.View.extend({
       $("body").append($temp);
       $temp.val(value).select();
       document.execCommand("copy");
-      $temp.remove(); 
+      $temp.remove();
       // alert("link copied...");
     } else {
       alert("Select file type");
@@ -122,7 +131,66 @@ App.views.ResultView = Backbone.View.extend({
     console.log("Download started...");
   },
 
-  preview: function() {
-    new App.views.PreviewModal().show();
+  preview: function(e) {
+    var domNode = $(e.currentTarget.parentNode.parentNode).find(
+      ".img-resolution"
+    )[0];
+    var selIndex = domNode.options.selectedIndex;
+    var imgName = domNode.options[selIndex].getAttribute("name");
+
+    // var targetValue = $(e.target).attr("data-imgUrl");
+    var extension = imgName.substr(imgName.lastIndexOf(".") + 1);
+    var Items =
+      "<iframe src='https://docs.google.com/gview?url=https://s3.amazonaws.com/varsha-testing/email-attachments/'";
+    if (!extension) {
+      alert("Select file type...");
+      return;
+    } else {
+      if (
+        extension === "pdf" ||
+        extension === "doc" ||
+        extension === "xls" ||
+        extension === "ppt"
+      ) {
+        Items = Items + imgName + '&embedded=true" width="500" height="500">';
+      } else if (
+        extension === "jpg" ||
+        extension === "png" ||
+        extension === "tiff" ||
+        extension === "eps"
+      ) {
+        Items =
+          "<img src=https://s3.amazonaws.com/varsha-testing/email-attachments/" +
+          imgName +
+          " />";
+      } else if (extension === "mp4") {
+        var Items =
+          '<video width="600" controls><source src="' +
+          Items +
+          imgName +
+          '" type="video/mp4">Your browser does not support HTML5 video. </video>';
+      } else {
+        Items =
+          "<img src=https://s3.amazonaws.com/varsha-testing/email-attachments/" +
+          imgName +
+          " />";
+      }
+    }
+    // new App.views.PreviewModal({Items: Items}).show();
+
+    $("#enlarge")
+      .html(Items)
+      .dialog({
+        modal: true,
+        height: "auto",
+        width: "600",
+        position: ["center", 0],
+        close: function() {
+          $(this)
+            .dialog("destroy")
+            .empty();
+        }
+      });
+    return false;
   }
 });

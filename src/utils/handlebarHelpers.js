@@ -25,13 +25,13 @@ Handlebars.registerHelper("selectDropdownReso", function(obj) {
   if (fileType.length === 1) {
     obj.forEach(el => {
       if (fileType[0] == 'pdf') {
-        strSelect = strSelect + "<option value=" + el.url + ">" + el.spec.title + "</option>";
+        strSelect = strSelect + "<option value=" + el.url + " name=" + el.name + ">" + el.spec.title + "</option>";
       } else {
-        strSelect = strSelect + "<option value=" + el.url + ">" + el.spec.width + " X " + el.spec.height + " at " + el.spec.resolution + "</option>";
+        strSelect = strSelect + "<option value=" + el.url + " name=" + el.name + ">" + el.spec.width + " X " + el.spec.height + " at " + el.spec.resolution + "</option>";
       }
     });
   } else {
-    strSelect = strSelect + "<option value=''>Select Resolution</option>"
+    strSelect = strSelect + "<option value='' name=''>Select Resolution</option>"
   }
   return new Handlebars.SafeString(strSelect + '</select>');
 });

@@ -19853,10 +19853,6 @@ App.views.FilterView = Backbone.View.extend({
   render: function() {
     var self = this;
     var filters = App.helpers.getFilters();
-    var assetTypeData = this.filtersData.reduce((acc, val) => {
-      acc.indexOf(val.asset_type) === -1 ? acc.push(val.asset_type) : acc;
-      return acc;
-    }, []);
     var brandNameData = this.filtersData.reduce((acc, val) => {
       acc.indexOf(val.brandName) === -1 ? acc.push(val.brandName) : acc;
       return acc;
@@ -19864,19 +19860,24 @@ App.views.FilterView = Backbone.View.extend({
     $.get("/src/templates/filters.hbs", function(templateHtml) {
       var template = Handlebars.compile(templateHtml);
       var finalHtml = template({
-        assetTypeData: assetTypeData,
         brandNameData: brandNameData
       });
       self.$el.html(finalHtml);
-      $('#asset-type option[value="' + filters.asset_type + '"]').attr(
-        "selected",
-        "selected"
-      );
-      $('#brand-view option[value="' + filters.brandName + '"]').attr(
-        "selected",
-        "selected"
-      );
-      $("#search-box").val(filters.keyword);
+      if (filters.asset_type) {
+        $('#asset-type option[value="' + filters.asset_type + '"]').attr(
+          "selected",
+          "selected"
+        );
+      }
+      if (filters.brandName) {
+        $('#brand-view option[value="' + filters.brandName + '"]').attr(
+          "selected",
+          "selected"
+        );
+      }
+      if (filters.keyword) {
+        $("#search-box").val(filters.keyword);
+      }
     });
     return self;
   },
@@ -19950,14 +19951,8 @@ App.views.HomeView = Backbone.View.extend({
     var self = this;
     var filters = App.helpers.getFilters();
     if (filtersPassed && filtersPassed == "all") {
-      App.helpers.setFilters({
-        asset_type: "",
-        brandName: "",
-        keyword: ""
-      });
-      delete filters.asset_type;
-      delete filters.brandName;
-      delete filters.keyword;
+      localStorage.removeItem("filters");
+      filters = App.helpers.getFilters();
     } else if (filtersPassed && "brandName" in filtersPassed) {
       delete filters.asset_type;
       delete filters.keyword;
@@ -19968,7 +19963,6 @@ App.views.HomeView = Backbone.View.extend({
       delete filters.asset_type;
       delete filters.brandName;
     }
-    delete filters.fileType;
     this.collection.fetch({ data: filters }).done(function() {
       self.render();
     });
@@ -20016,7 +20010,8 @@ App.views.PreviewModal = Backbone.View.extend({
     hidden: "close"
   },
 
-  initialize: function() {
+  initialize: function(options) {
+    this.options = options.Items;
     _.bindAll(this, "show", "close", "render", "renderView");
     this.render();
   },
@@ -20035,6 +20030,7 @@ App.views.PreviewModal = Backbone.View.extend({
     $.get("/src/templates/previewmodal.hbs", function(templateHtml) {
       var template = Handlebars.compile(templateHtml);
       self.renderView(template);
+      $("#modal_content").html(self.options);
     });
     return self;
   },
@@ -20104,6 +20100,7 @@ App.views.ResultView = Backbone.View.extend({
         optionsObj.id = element._id;
         optionsObj.url = element.url;
         optionsObj.resolution = element.spec.title;
+        optionsObj.name = element.name;
         optionsArr.push(optionsObj);
         optionsObj = {};
       });
@@ -20111,6 +20108,7 @@ App.views.ResultView = Backbone.View.extend({
       fileTypeArr.forEach(element => {
         optionsObj.id = element._id;
         optionsObj.url = element.url;
+        optionsObj.name = element.name;
         optionsObj.resolution =
           element.spec.width +
           " X " +
@@ -20135,8 +20133,8 @@ App.views.ResultView = Backbone.View.extend({
         var option = document.createElement("option");
         option.text = element.resolution;
         option.value = element.url;
-        option.name = element.name
         option.id = element.id;
+        option.setAttribute('name', element.name);
         siblingNode.add(option);
       });
       // dateNode.innerHTML = new Date(fileTypeArr[0].updatedAt).toLocaleDateString("en-US");
@@ -20177,58 +20175,66 @@ App.views.ResultView = Backbone.View.extend({
   },
 
   preview: function(e) {
-    // new App.views.PreviewModal().show();
+    var domNode = $(e.currentTarget.parentNode.parentNode).find(
+      ".img-resolution"
+    )[0];
+    var selIndex = domNode.options.selectedIndex;
+    var imgName = domNode.options[selIndex].getAttribute("name");
 
-    var targetValue = $(e.target).attr("data-imgUrl");
-    // var extension = targetValue.substr(targetValue.lastIndexOf(".") + 1);
-    // var Items =
-    //   "<iframe src='https://docs.google.com/gview?url=https://s3.amazonaws.com/varsha-testing/email-attachments/'";
+    // var targetValue = $(e.target).attr("data-imgUrl");
+    var extension = imgName.substr(imgName.lastIndexOf(".") + 1);
+    var Items =
+      "<iframe src='https://docs.google.com/gview?url=https://s3.amazonaws.com/varsha-testing/email-attachments/'";
+    if (!extension) {
+      alert("Select file type...");
+      return;
+    } else {
+      if (
+        extension === "pdf" ||
+        extension === "doc" ||
+        extension === "xls" ||
+        extension === "ppt"
+      ) {
+        Items = Items + imgName + '&embedded=true" width="500" height="500">';
+      } else if (
+        extension === "jpg" ||
+        extension === "png" ||
+        extension === "tiff" ||
+        extension === "eps"
+      ) {
+        Items =
+          "<img src=https://s3.amazonaws.com/varsha-testing/email-attachments/" +
+          imgName +
+          " />";
+      } else if (extension === "mp4") {
+        var Items =
+          '<video width="600" controls><source src="' +
+          Items +
+          imgName +
+          '" type="video/mp4">Your browser does not support HTML5 video. </video>';
+      } else {
+        Items =
+          "<img src=https://s3.amazonaws.com/varsha-testing/email-attachments/" +
+          imgName +
+          " />";
+      }
+    }
+    // new App.views.PreviewModal({Items: Items}).show();
 
-    console.log("target", targetValue);
-    // if (
-    //   extension === "pdf" ||
-    //   extension === "doc" ||
-    //   extension === "xls" ||
-    //   extension === "ppt"
-    // ) {
-    //   Items = Items + targetValue + '&embedded=true" width="500" height="500">';
-    // } else if (
-    //   extension === "jpg" ||
-    //   extension === "png" ||
-    //   extension === "tiff" ||
-    //   extension === "eps"
-    // ) {
-    //   Items =
-    //     "<img src=https://s3.amazonaws.com/varsha-testing/email-attachments/" +
-    //     targetValue +
-    //     " />";
-    // } else if (extension === "mp4") {
-    //   var Items =
-    //     '<video width="600" controls><source src="' +
-    //     Items +
-    //     targetValue +
-    //     '" type="video/mp4">Your browser does not support HTML5 video. </video>';
-    // } else {
-    //   Items =
-    //     "<img src=https://s3.amazonaws.com/varsha-testing/email-attachments/" +
-    //     targetValue +
-    //     " />";
-    // }
-    // $("#enlarge")
-    //   .html(Items)
-    //   .dialog({
-    //     modal: true,
-    //     height: "auto",
-    //     width: "600",
-    //     position: ["center", 0],
-    //     close: function() {
-    //       $(this)
-    //         .dialog("destroy")
-    //         .empty();
-    //     }
-    //   });
-
-    // return false;
+    $("#enlarge")
+      .html(Items)
+      .dialog({
+        modal: true,
+        height: "auto",
+        width: "600",
+        position: ["center", 0],
+        close: function() {
+          $(this)
+            .dialog("destroy")
+            .empty();
+        }
+      });
+    return false;
   }
 });
 ;var App = App || {};

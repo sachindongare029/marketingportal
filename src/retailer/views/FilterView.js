@@ -25,10 +25,6 @@ App.views.FilterView = Backbone.View.extend({
   render: function() {
     var self = this;
     var filters = App.helpers.getFilters();
-    var assetTypeData = this.filtersData.reduce((acc, val) => {
-      acc.indexOf(val.asset_type) === -1 ? acc.push(val.asset_type) : acc;
-      return acc;
-    }, []);
     var brandNameData = this.filtersData.reduce((acc, val) => {
       acc.indexOf(val.brandName) === -1 ? acc.push(val.brandName) : acc;
       return acc;
@@ -36,19 +32,24 @@ App.views.FilterView = Backbone.View.extend({
     $.get("/src/templates/filters.hbs", function(templateHtml) {
       var template = Handlebars.compile(templateHtml);
       var finalHtml = template({
-        assetTypeData: assetTypeData,
         brandNameData: brandNameData
       });
       self.$el.html(finalHtml);
-      $('#asset-type option[value="' + filters.asset_type + '"]').attr(
-        "selected",
-        "selected"
-      );
-      $('#brand-view option[value="' + filters.brandName + '"]').attr(
-        "selected",
-        "selected"
-      );
-      $("#search-box").val(filters.keyword);
+      if (filters.asset_type) {
+        $('#asset-type option[value="' + filters.asset_type + '"]').attr(
+          "selected",
+          "selected"
+        );
+      }
+      if (filters.brandName) {
+        $('#brand-view option[value="' + filters.brandName + '"]').attr(
+          "selected",
+          "selected"
+        );
+      }
+      if (filters.keyword) {
+        $("#search-box").val(filters.keyword);
+      }
     });
     return self;
   },
