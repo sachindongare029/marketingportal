@@ -1,7 +1,7 @@
 var App = App || {};
 
 App.views.HomeView = Backbone.View.extend({
-  el: "#root",
+  el: "#home",
 
   events: {},
 
@@ -10,30 +10,17 @@ App.views.HomeView = Backbone.View.extend({
     this.collection = new App.collections.MarketingCollection();
     App.eventBus.on(
       "GET_PRODUCTS",
-      function(filtersPassed) {
-        this.doFetch(filtersPassed);
+      function() {
+        this.doFetch();
       }.bind(this)
     );
 
-    App.eventBus.trigger("GET_PRODUCTS", "all");
+    App.eventBus.trigger("GET_PRODUCTS");
   },
 
-  doFetch: function(filtersPassed) {
+  doFetch: function() {
     var self = this;
     var filters = App.helpers.getFilters();
-    if (filtersPassed && filtersPassed == "all") {
-      localStorage.removeItem("filters");
-      filters = App.helpers.getFilters();
-    } else if (filtersPassed && "brandName" in filtersPassed) {
-      delete filters.asset_type;
-      delete filters.keyword;
-    } else if (filtersPassed && "asset_type" in filtersPassed) {
-      delete filters.brandName;
-      delete filters.keyword;
-    } else if (filtersPassed && "keyword" in filtersPassed) {
-      delete filters.asset_type;
-      delete filters.brandName;
-    }
     this.collection.fetch({ data: filters }).done(function() {
       self.render();
     });
@@ -48,23 +35,11 @@ App.views.HomeView = Backbone.View.extend({
         currentPage: "Marketing Portal"
       });
       self.$el.html(finalHtml);
-      self.renderDescView();
-      self.renderFilterView();
       self.renderResultView();
     });
     return self;
   },
-
-  renderDescView: function() {
-    new App.views.DescView();
-  },
-
-  renderFilterView: function() {
-    new App.views.FilterView({
-      data: this.collection.toJSON()
-    });
-  },
-
+  
   renderResultView: function() {
     new App.views.ResultView({
       data: this.collection.toJSON()

@@ -19538,16 +19538,14 @@ App.helpers = {
 ;var App = App || {};
 
 App.models.MarketingModel = Backbone.Model.extend({
-  url: function() {
-    return "https://optportal-node-qa.optcentral.com/node/api/mvpassets";
-  },
   defaults: {
     _id: null,
   }
 });
 ;var App = App || {};
 
-var base_url = "https://optportal-node-qa.optcentral.com/node/api/mvpassets";
+var base_url =
+  "https://optportal-node-qa.optcentral.com/node/api/mvpassets?&retailers=10";
 App.collections.MarketingCollection = Backbone.Collection.extend({
   url: function() {
     return base_url;
@@ -19852,7 +19850,6 @@ App.views.FilterView = Backbone.View.extend({
 
   render: function() {
     var self = this;
-    var filters = App.helpers.getFilters();
     var brandNameData = this.filtersData.reduce((acc, val) => {
       acc.indexOf(val.brandName) === -1 ? acc.push(val.brandName) : acc;
       return acc;
@@ -19863,21 +19860,6 @@ App.views.FilterView = Backbone.View.extend({
         brandNameData: brandNameData
       });
       self.$el.html(finalHtml);
-      if (filters.asset_type) {
-        $('#asset-type option[value="' + filters.asset_type + '"]').attr(
-          "selected",
-          "selected"
-        );
-      }
-      if (filters.brandName) {
-        $('#brand-view option[value="' + filters.brandName + '"]').attr(
-          "selected",
-          "selected"
-        );
-      }
-      if (filters.keyword) {
-        $("#search-box").val(filters.keyword);
-      }
     });
     return self;
   },
@@ -19885,28 +19867,30 @@ App.views.FilterView = Backbone.View.extend({
   assetTypeFilter: function() {
     var assetType = $("#asset-type").val();
     if (assetType == "all") {
-      App.eventBus.trigger("GET_PRODUCTS", "all");
+      App.helpers.setFilters({
+        asset_type: ''
+      });
+      App.eventBus.trigger("GET_PRODUCTS");
     } else {
       App.helpers.setFilters({
         asset_type: assetType
       });
-      App.eventBus.trigger("GET_PRODUCTS", {
-        asset_type: assetType
-      });
+      App.eventBus.trigger("GET_PRODUCTS");
     }
   },
 
   brandNameFilter: function() {
     var brand = $("#brand-view").val();
     if (brand == "all") {
-      App.eventBus.trigger("GET_PRODUCTS", "all");
+      App.helpers.setFilters({
+        brandName: ''
+      });
+      App.eventBus.trigger("GET_PRODUCTS");
     } else {
       App.helpers.setFilters({
         brandName: brand
       });
-      App.eventBus.trigger("GET_PRODUCTS", {
-        brandName: brand
-      });
+      App.eventBus.trigger("GET_PRODUCTS");
     }
   },
 
@@ -19915,14 +19899,15 @@ App.views.FilterView = Backbone.View.extend({
     if (code == 13) {
       var keyword = $("#search-box").val();
       if (!keyword) {
-        App.eventBus.trigger("GET_PRODUCTS", "all");
+        App.helpers.setFilters({
+          keyword: ''
+        });
+        App.eventBus.trigger("GET_PRODUCTS");
       } else {
         App.helpers.setFilters({
           keyword: keyword
         });
-        App.eventBus.trigger("GET_PRODUCTS", {
-          keyword: keyword
-        });
+        App.eventBus.trigger("GET_PRODUCTS");
       }
     }
   }
@@ -19930,7 +19915,7 @@ App.views.FilterView = Backbone.View.extend({
 ;var App = App || {};
 
 App.views.HomeView = Backbone.View.extend({
-  el: "#root",
+  el: "#home",
 
   events: {},
 
@@ -19939,30 +19924,17 @@ App.views.HomeView = Backbone.View.extend({
     this.collection = new App.collections.MarketingCollection();
     App.eventBus.on(
       "GET_PRODUCTS",
-      function(filtersPassed) {
-        this.doFetch(filtersPassed);
+      function() {
+        this.doFetch();
       }.bind(this)
     );
 
-    App.eventBus.trigger("GET_PRODUCTS", "all");
+    App.eventBus.trigger("GET_PRODUCTS");
   },
 
-  doFetch: function(filtersPassed) {
+  doFetch: function() {
     var self = this;
     var filters = App.helpers.getFilters();
-    if (filtersPassed && filtersPassed == "all") {
-      localStorage.removeItem("filters");
-      filters = App.helpers.getFilters();
-    } else if (filtersPassed && "brandName" in filtersPassed) {
-      delete filters.asset_type;
-      delete filters.keyword;
-    } else if (filtersPassed && "asset_type" in filtersPassed) {
-      delete filters.brandName;
-      delete filters.keyword;
-    } else if (filtersPassed && "keyword" in filtersPassed) {
-      delete filters.asset_type;
-      delete filters.brandName;
-    }
     this.collection.fetch({ data: filters }).done(function() {
       self.render();
     });
@@ -19977,23 +19949,11 @@ App.views.HomeView = Backbone.View.extend({
         currentPage: "Marketing Portal"
       });
       self.$el.html(finalHtml);
-      self.renderDescView();
-      self.renderFilterView();
       self.renderResultView();
     });
     return self;
   },
-
-  renderDescView: function() {
-    new App.views.DescView();
-  },
-
-  renderFilterView: function() {
-    new App.views.FilterView({
-      data: this.collection.toJSON()
-    });
-  },
-
+  
   renderResultView: function() {
     new App.views.ResultView({
       data: this.collection.toJSON()
@@ -20074,9 +20034,19 @@ App.views.ResultView = Backbone.View.extend({
     return self;
   },
 
-  BrandSort: function() {
-    this.options = _.sortBy(this.options, "brandName");
-    this.render();
+  BrandSort: function(e) {
+    var type = $(e.target).attr("value");
+    if (type === 'asc') {
+      App.helpers.setFilters({
+        sort: "brandName;asc"
+      });
+      App.eventBus.trigger("GET_PRODUCTS");
+    } else {
+      App.helpers.setFilters({
+        sort: "brandName;desc"
+      });
+      App.eventBus.trigger("GET_PRODUCTS");
+    }
   },
 
   fileTypeChange: function(e) {
@@ -20171,7 +20141,7 @@ App.views.ResultView = Backbone.View.extend({
   },
 
   download: function() {
-    console.log("Download started...");
+    // console.log("Download started...");
   },
 
   preview: function(e) {
@@ -20246,6 +20216,8 @@ App.Router = Backbone.Router.extend({
   },
 
   homeView: function() {
+    new App.views.DescView();
+    new App.views.FilterView();
     new App.views.HomeView();
   },
 

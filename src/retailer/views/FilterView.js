@@ -24,7 +24,6 @@ App.views.FilterView = Backbone.View.extend({
 
   render: function() {
     var self = this;
-    var filters = App.helpers.getFilters();
     var brandNameData = this.filtersData.reduce((acc, val) => {
       acc.indexOf(val.brandName) === -1 ? acc.push(val.brandName) : acc;
       return acc;
@@ -35,21 +34,6 @@ App.views.FilterView = Backbone.View.extend({
         brandNameData: brandNameData
       });
       self.$el.html(finalHtml);
-      if (filters.asset_type) {
-        $('#asset-type option[value="' + filters.asset_type + '"]').attr(
-          "selected",
-          "selected"
-        );
-      }
-      if (filters.brandName) {
-        $('#brand-view option[value="' + filters.brandName + '"]').attr(
-          "selected",
-          "selected"
-        );
-      }
-      if (filters.keyword) {
-        $("#search-box").val(filters.keyword);
-      }
     });
     return self;
   },
@@ -57,28 +41,30 @@ App.views.FilterView = Backbone.View.extend({
   assetTypeFilter: function() {
     var assetType = $("#asset-type").val();
     if (assetType == "all") {
-      App.eventBus.trigger("GET_PRODUCTS", "all");
+      App.helpers.setFilters({
+        asset_type: ''
+      });
+      App.eventBus.trigger("GET_PRODUCTS");
     } else {
       App.helpers.setFilters({
         asset_type: assetType
       });
-      App.eventBus.trigger("GET_PRODUCTS", {
-        asset_type: assetType
-      });
+      App.eventBus.trigger("GET_PRODUCTS");
     }
   },
 
   brandNameFilter: function() {
     var brand = $("#brand-view").val();
     if (brand == "all") {
-      App.eventBus.trigger("GET_PRODUCTS", "all");
+      App.helpers.setFilters({
+        brandName: ''
+      });
+      App.eventBus.trigger("GET_PRODUCTS");
     } else {
       App.helpers.setFilters({
         brandName: brand
       });
-      App.eventBus.trigger("GET_PRODUCTS", {
-        brandName: brand
-      });
+      App.eventBus.trigger("GET_PRODUCTS");
     }
   },
 
@@ -87,14 +73,15 @@ App.views.FilterView = Backbone.View.extend({
     if (code == 13) {
       var keyword = $("#search-box").val();
       if (!keyword) {
-        App.eventBus.trigger("GET_PRODUCTS", "all");
+        App.helpers.setFilters({
+          keyword: ''
+        });
+        App.eventBus.trigger("GET_PRODUCTS");
       } else {
         App.helpers.setFilters({
           keyword: keyword
         });
-        App.eventBus.trigger("GET_PRODUCTS", {
-          keyword: keyword
-        });
+        App.eventBus.trigger("GET_PRODUCTS");
       }
     }
   }

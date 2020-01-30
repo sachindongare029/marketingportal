@@ -7,6 +7,8 @@ App.Router = Backbone.Router.extend({
   },
 
   homeView: function() {
+    new App.views.DescView();
+    new App.views.FilterView();
     new App.views.HomeView();
   },
 

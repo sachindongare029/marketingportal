@@ -31,9 +31,19 @@ App.views.ResultView = Backbone.View.extend({
     return self;
   },
 
-  BrandSort: function() {
-    this.options = _.sortBy(this.options, "brandName");
-    this.render();
+  BrandSort: function(e) {
+    var type = $(e.target).attr("value");
+    if (type === 'asc') {
+      App.helpers.setFilters({
+        sort: "brandName;asc"
+      });
+      App.eventBus.trigger("GET_PRODUCTS");
+    } else {
+      App.helpers.setFilters({
+        sort: "brandName;desc"
+      });
+      App.eventBus.trigger("GET_PRODUCTS");
+    }
   },
 
   fileTypeChange: function(e) {
@@ -128,7 +138,7 @@ App.views.ResultView = Backbone.View.extend({
   },
 
   download: function() {
-    console.log("Download started...");
+    // console.log("Download started...");
   },
 
   preview: function(e) {
