@@ -7,7 +7,7 @@
     "backbone": "^1.4.0",
     "bootstrap-2.3.2": "^1.0.0",
     "handlebars": "^4.7.7",
-    "jquery": "^3.4.1",
+    "jquery": "^3.5.0",
     "less": "^3.10.3",
     "popper.js": "^1.16.0"
   },
